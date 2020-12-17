@@ -14,7 +14,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c",
-    "prepublish": "yarn build",
+    "prerelease": "yarn build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
