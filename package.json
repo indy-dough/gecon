@@ -2,18 +2,41 @@
   "name": "gecon",
   "version": "1.0.0",
   "description": "Generator control library",
-  "main": "index.js",
+  "keywords": [
+    "async",
+    "flow",
+    "generator",
+    "control",
+    "gecon"
+  ],
+  "main": "./dist/bundle.cjs.js",
+  "module": "./dist/bundle.esm.js",
   "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "rollup -c",
+    "prepublish": "yarn build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ash-developer/gecon.git"
   },
-  "author": "Andrei Shevel",
+  "author": "Andrei Shevel <shevvy.az@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ash-developer/gecon/issues"
   },
-  "homepage": "https://github.com/ash-developer/gecon#readme"
+  "homepage": "https://github.com/ash-developer/gecon#readme",
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/preset-env": "^7.12.7",
+    "@rollup/plugin-babel": "^5.2.2",
+    "core-js": "^3.8.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.34.2",
+    "rollup-plugin-terser": "^7.0.2"
+  },
+  "engines": {
+    "node": ">= 7.6.0"
+  }
 }
