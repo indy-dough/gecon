@@ -9,7 +9,7 @@
  * @param args
  * @returns {Promise}
  */
-export async function call (generatorFn, ...args) {
+export async function call(generatorFn, ...args) {
   return execFn(generatorFn, args);
 }
 
@@ -17,12 +17,22 @@ export async function call (generatorFn, ...args) {
  * Return async function for provided generator
  *
  * @param generatorFn Generator function
- * @returns {function: Promise}
+ * @returns {function}
  */
-export function promisify (generatorFn) {
-  return async function (...args) {
-    return execFn(generatorFn, args);
+export function promisify(generatorFn) {
+  let current;
+  let last;
+
+  const fn = async function (...args) {
+    current = last;
+    return execFn(generatorFn, args, () => current === last);
   };
+
+  fn.stop = () => {
+    last = Object.create({});
+  };
+
+  return fn;
 }
 
 /**
@@ -30,22 +40,42 @@ export function promisify (generatorFn) {
  * Return async function for provided generator
  *
  * @param generatorFn Generator function
- * @returns {function: Promise}
+ * @returns {function}
  */
-export function first (generatorFn) {
+export function first(generatorFn) {
   let hasFirst = false;
+  let first = null;
 
-  return async function (...args) {
+  const fn = async function (...args) {
     if (hasFirst) {
       return;
     }
 
+    const current = Object.create({});
+    first = current;
     hasFirst = true;
-    const value = await execFn(generatorFn, args);
-    hasFirst = false;
 
-    return value;
+    try {
+      const value = await execFn(generatorFn, args, () => current === first);
+      if (current === first) {
+        hasFirst = false;
+
+        return value;
+      }
+    } catch (error) {
+      if (current === first) {
+        hasFirst = false;
+        throw error;
+      }
+    }
   };
+
+  fn.stop = () => {
+    first = Object.create({});
+    hasFirst = false;
+  };
+
+  return fn;
 }
 
 /**
@@ -53,17 +83,23 @@ export function first (generatorFn) {
  * Return async function for provided generator
  *
  * @param generatorFn Generator function
- * @returns {function: Promise}
+ * @returns {function}
  */
-export function last (generatorFn) {
+export function last(generatorFn) {
   let last = null;
 
-  return async function (...args) {
+  const fn = async function (...args) {
     const current = Object.create({});
     last = current;
 
     return execFn(generatorFn, args, () => current === last);
   };
+
+  fn.stop = () => {
+    last = Object.create({});
+  };
+
+  return fn;
 }
 
 /**
@@ -71,18 +107,20 @@ export function last (generatorFn) {
  * Return async function for provided generator
  *
  * @param generatorFn Generator function
- * @returns {function: Promise}
+ * @param options options
+ * @returns {function}
  */
-export function sync (generatorFn) {
+export function sync(generatorFn, options) {
   const queue = [];
-  let isRunning = false;
+  let isRunning = 0;
+  const parallel = options.parallel || 1;
 
-  async function runQueue () {
-    if (isRunning || queue.length === 0) {
+  async function runQueue() {
+    if (isRunning === parallel || queue.length === 0) {
       return;
     }
 
-    isRunning = true;
+    isRunning++;
 
     const { resolve, reject, args } = queue.shift();
 
@@ -93,7 +131,7 @@ export function sync (generatorFn) {
       reject(error);
     }
 
-    isRunning = false;
+    isRunning--;
     runQueue();
   }
 
@@ -111,14 +149,14 @@ export function sync (generatorFn) {
  * Return async function for provided generator
  *
  * @param generatorFn Generator function
- * @returns {function: Promise}
+ * @returns {function}
  */
-export function lastSync (generatorFn) {
+export function lastSync(generatorFn) {
   const queue = [];
   let last = null;
   let isRunning = false;
 
-  async function runQueue () {
+  async function runQueue() {
     if (isRunning || queue.length === 0) {
       return;
     }
@@ -155,31 +193,44 @@ export function lastSync (generatorFn) {
  * @param ms Milliseconds
  * @returns {Generator<Promise<unknown>, void, *>}
  */
-export function * delay (ms) {
+export function* delay(ms) {
   yield new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function execFn (generatorFn, args, isActual) {
+async function execFn(generatorFn, args, isActual) {
   const generator = generatorFn(...args);
 
   return exec(generator, isActual);
 }
 
-async function exec (generator, isActual) {
+async function evaluate(nextObj, isActual) {
+  let error;
+  let value;
+
+  try {
+    value = await getValue(nextObj, isActual);
+  } catch (e) {
+    error = e;
+  }
+
+  return [error, value];
+}
+
+async function exec(generator, isActual) {
   let nextObj = generator.next();
-  let value = await getValue(nextObj, isActual);
+  let [error, value] = await evaluate(nextObj, isActual);
   while (!nextObj.done) {
     if (isActual && !isActual()) {
       return;
     }
-    nextObj = generator.next(value);
-    value = await getValue(nextObj, isActual);
+    nextObj = error ? generator.throw(error) : generator.next(value);
+    [error, value] = await evaluate(nextObj, isActual);
   }
 
   return value;
 }
 
-async function getValue (nextObj, isActual) {
+async function getValue(nextObj, isActual) {
   let value = nextObj.value;
 
   if (!value) {
@@ -195,10 +246,10 @@ async function getValue (nextObj, isActual) {
   return value;
 }
 
-function isPromise (obj) {
+function isPromise(obj) {
   return typeof obj.then === 'function';
 }
 
-function isGenerator (obj) {
+function isGenerator(obj) {
   return typeof obj.next === 'function';
 }

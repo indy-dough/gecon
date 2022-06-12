@@ -9,31 +9,31 @@
     "control",
     "gecon"
   ],
-  "main": "./dist/bundle.cjs.js",
-  "module": "./dist/bundle.esm.js",
-  "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "rollup -c",
-    "prepack": "yarn build",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": "git@github.com:indy-dough/gecon.git",
-  "author": "Andrei Shevel <shevvy.az@gmail.com>",
   "license": "MIT",
+  "private": false,
+  "author": "Andrei Shevel <shevvy.az@gmail.com>",
+  "main": "./dist/index.min.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "repository": "git@github.com:indy-dough/gecon.git",
   "bugs": {
     "url": "https://github.com/indy-dough/gecon/issues"
   },
   "homepage": "https://github.com/indy-dough/gecon#readme",
-  "devDependencies": {
-    "@babel/core": "^7.12.9",
-    "@babel/preset-env": "^7.12.7",
-    "@rollup/plugin-babel": "^5.2.2",
-    "core-js": "^3.8.1",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.34.2",
-    "rollup-plugin-terser": "^7.0.2"
+  "scripts": {
+    "build": "rollup -c",
+    "prepare": "yarn build"
   },
-  "engines": {
-    "node": ">= 7.6.0"
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-react": "^7.17.12",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "rollup": "^2.75.6",
+    "rollup-plugin-terser": "^7.0.2",
+    "terser": "^5.14.1"
   }
 }

@@ -1,27 +1,19 @@
+import resolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 
-export default [
-  {
-    input: 'index.js',
-    output: {
-      file: 'dist/bundle.cjs.js',
+export default {
+  input: 'src/index.js',
+  output: [
+    {
+      file: 'dist/index.js',
       format: 'cjs',
-      name: 'gecon'
     },
-    plugins: [
-    ],
-  },
-  {
-    input: 'index.js',
-    output: {
-      file: 'dist/bundle.esm.js',
-      format: 'esm',
-      name: 'gecon'
+    {
+      file: 'dist/index.min.js',
+      format: 'cjs',
+      plugins: [terser()],
     },
-    plugins: [
-      babel(),
-      terser()
-    ],
-  }
-];
+  ],
+  plugins: [resolve(), babel({ babelHelpers: 'bundled' })]
+};
