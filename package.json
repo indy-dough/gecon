@@ -12,7 +12,8 @@
   "license": "MIT",
   "private": false,
   "author": "Andrei Shevel <shevvy.az@gmail.com>",
-  "main": "./dist/index.min.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.esm.js",
   "files": [
     "dist/**/*"
   ],
