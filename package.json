@@ -11,7 +11,7 @@
   ],
   "license": "MIT",
   "private": false,
-  "author": "Andrei Shevel <shevvy.az@gmail.com>",
+  "author": "Andrei Shevel <myindydough@gmail.com>",
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
   "files": [
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/indy-dough/gecon#readme",
   "scripts": {
+    "format": "prettier -w .",
     "build": "rollup -c",
     "prepare": "yarn build"
   },
@@ -33,8 +34,12 @@
     "@babel/preset-react": "^7.17.12",
     "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-typescript": "^9.0.1",
+    "prettier": "^2.7.1",
     "rollup": "^2.75.6",
     "rollup-plugin-terser": "^7.0.2",
-    "terser": "^5.14.1"
+    "terser": "^5.14.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.8.4"
   }
 }
